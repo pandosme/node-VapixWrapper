@@ -19,9 +19,23 @@ exports.HTTP_Post = function( device, cgi, payload, responseType, callback ) {
 	});
 }
 
+exports.SOAP = function( device, soapBody, callback ) {
+	VapixDigest.Soap( device, soapBody, function( error, body ) {
+		if( error ) {
+			callback( error, body );
+			return;
+		}
+		VapixParser.SoapParser( body, function(error,data){
+			callback( error, data );
+		});
+	});
+}
+
+
 exports.CGI = function( device, cgi, callback ) {
 //	console.log("VapixWrapper: CGI", device, cgi);
 	VapixDigest.HTTP_Get( device, cgi, "text", function( error, body ) {
+//		console.log("VapixWrapper: Response", device, cgi);
 		if(error) {
 			callback(error,body);
 			return;

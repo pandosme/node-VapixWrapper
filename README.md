@@ -1,4 +1,4 @@
-# VapixWrapper
+# VapixWrapper (C) Fred Juhlin 2021
 A library that simplifies working with Axis VAPIX API request and response.
 
 ## Device
@@ -57,6 +57,16 @@ var requestBody = {
 }
 
 VapixWrapper.CGI_Post( device, "/axis-cgi/network_settings.cgi", requestBody, function( error, body ) {
+	//Do something...
+});
+```
+
+## SOAP( device, soapBody, callback )
+Make an a SOAP call to Axis device (vapix/services).  Parses and XML resonce and make it to a JS object.
+```
+var soapBody = '<tds:GetCertificates xmlns="http://www.onvif.org/ver10/device/wsdl"></tds:GetCertificates>';
+
+VapixWrapper.SOAP( device, soapBody, function( error, body ) {
 	//Do something...
 });
 ```

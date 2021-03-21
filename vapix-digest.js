@@ -122,21 +122,25 @@ exports.HTTP_Post = function( device, path, body, responseType, callback ) {
 
 exports.Soap = function( device, body, callback ) {
 	var soapEnvelope = '<SOAP-ENV:Envelope ' +
+	                   'xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" '+
+					   'xmlns:xs="http://www.w3.org/2001/XMLSchema" '+
 					   'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" '+
 					   'xmlns:xsd="http://www.w3.org/2001/XMLSchema" '+
-					   'xmlns:tt="http://www.onvif.org/ver10/schema "'+
+					   'xmlns:tt="http://www.onvif.org/ver10/schema" '+
+					   'xmlns:onvif="http://www.onvif.org/ver10/schema" '+
 					   'xmlns:tds="http://www.onvif.org/ver10/device/wsdl" '+
 					   'xmlns:tev="http://www.onvif.org/ver10/event/wsdl" '+
 					   'xmlns:tns1="http://www.onvif.org/ver10/topics" ' +
-	                   'xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" '+
 					   'xmlns:acertificates="http://www.axis.com/vapix/ws/certificates" '+
 					   'xmlns:acert="http://www.axis.com/vapix/ws/cert" '+
 					   'xmlns:aev="http://www.axis.com/vapix/ws/event1" ' +
-					   'xmlns:SOAP-ENV="http://www.w3.org/2003/05/soap-envelope">';
+					   'xmlns:aweb="http://www.axis.com/vapix/ws/webserver" '+
+					   'xmlns:SOAP-ENV="http://www.w3.org/2003/05/soap-envelope">\n';
 					   
-	soapEnvelope += '<SOAP-ENV:Body>' + body + '</SOAP-ENV:Body>';
-	soapEnvelope += '</SOAP-ENV:Envelope>';
-	exports.HTTP_Post( device, '/vapix/services', soapEnvelope,"text", function( error, response) {
+	soapEnvelope += '<SOAP-ENV:Body>' + body + '</SOAP-ENV:Body>\n';
+	soapEnvelope += '</SOAP-ENV:Envelope>\n';
+//	console.log("VapixDigest.Soap", soapEnvelope);
+		exports.HTTP_Post( device, '/vapix/services', soapEnvelope,"text", function( error, response) {
 		callback(error,response);
 	});
 }
