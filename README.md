@@ -1,4 +1,5 @@
-# VapixWrapper (C) Fred Juhlin 2021
+# VapixWrapper 
+### (C) Fred Juhlin 2021
 A library that simplifies working with Axis VAPIX API request and response.
 
 ## Device
