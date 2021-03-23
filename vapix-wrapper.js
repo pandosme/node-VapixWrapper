@@ -31,11 +31,9 @@ exports.SOAP = function( device, soapBody, callback ) {
 	});
 }
 
-
 exports.CGI = function( device, cgi, callback ) {
 //	console.log("VapixWrapper: CGI", device, cgi);
 	VapixDigest.HTTP_Get( device, cgi, "text", function( error, body ) {
-//		console.log("VapixWrapper: Response", device, cgi);
 		if(error) {
 			callback(error,body);
 			return;
@@ -375,6 +373,7 @@ exports.Account_List = function( device, callback) {
 };
 
 exports.Account_Set = function( device, options, callback) {
+//	console.log("VapixWrapper.Account_Set:", device, options);
 	if( !options ) {
 		callback("Invalid input","No account data");
 		return;
@@ -394,24 +393,34 @@ exports.Account_Set = function( device, options, callback) {
 
 	var cgi = '/axis-cgi/pwdgrp.cgi?action=update&user=' + account.name + '&pwd=' + encodeURIComponent(account.password);
 	VapixDigest.HTTP_Get( device, cgi, "text", function( error, response ) {
-		if( error ) {
+//		console.log("Vapix.Wrapper.Account_Set: Update", error, response);
+		if( !error && response.search("Error") < 0 ) {
 			callback(error, response);
 			return;
 		}
-		if( response.search("Error") >= 0 ) {
-			var sgrp = "viewer";
-			if( account.privileges.toLowerCase() === "viewer" || account.privileges.toLowerCase() === "player" )
-				sgrp = "viewer";
-			if( account.privileges.toLowerCase() === "operator" || account.privileges.toLowerCase() === "client" )
-				sgrp = "viewer:operator:ptz";
-			if( account.privileges.toLowerCase() === "admin" || account.privileges.toLowerCase() === "administrator" )
-				sgrp = "viewer:operator:admin:ptz";
-			if( account.privileges.toLowerCase() === "api" )
-				sgrp = "operator:admin";
-			cgi = '/axis-cgi/pwdgrp.cgi?action=add&user=' + account.name + '&pwd=' + encodeURIComponent(account.password) + '&grp=users&sgrp=' + sgrp + '&comment=node';
-			VapixDigest.HTTP_Get( device, cgi, "text", function( error, response ) {	
+
+		if( account.name === "root" ) {  //Try generate root account for the first time
+			cgi = '/axis-cgi/pwdgrp.cgi?action=add&user=root&pwd=' + encodeURIComponent(account.password) + '&grp=root&sgrp=admin:operator:viewer:ptz';
+			VapixDigest.HTTP_Get_No_digest( device, cgi, "text", function(error, response ) {
+				callback( error, response );
+			});
+			return;
+		}
+		
+		var sgrp = "viewer";
+		if( account.privileges.toLowerCase() === "viewer" || account.privileges.toLowerCase() === "player" )
+			sgrp = "viewer";
+		if( account.privileges.toLowerCase() === "operator" || account.privileges.toLowerCase() === "client" )
+			sgrp = "viewer:operator:ptz";
+		if( account.privileges.toLowerCase() === "admin" || account.privileges.toLowerCase() === "administrator" )
+			sgrp = "viewer:operator:admin:ptz";
+		if( account.privileges.toLowerCase() === "api" )
+			sgrp = "operator:admin";
+		
+		cgi = '/axis-cgi/pwdgrp.cgi?action=add&user=' + account.name + '&pwd=' + encodeURIComponent(account.password) + '&grp=users&sgrp=' + sgrp + '&comment=node';
+		VapixDigest.HTTP_Get( device, cgi, "text", function( error, response ) {	
 				if( error ) {
-					callback( true, response );
+					callback( error, response );
 					return;
 				}
 				if( response.search("Error") >= 0 ) {
@@ -420,10 +429,8 @@ exports.Account_Set = function( device, options, callback) {
 				}
 				callback( false, "OK" );
 				return;
-			});
-			return;
-		}
-		callback( false, "OK" );
+		});
+//		callback( false, "OK" );
 	});
 };
 

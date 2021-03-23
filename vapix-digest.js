@@ -7,6 +7,25 @@ const FormData = require("form-data");
 
 var exports = module.exports = {};
 
+exports.HTTP_Get_No_digest = function( device, path, resonseType, callback ) {
+	var protocol = device.protocol || "http";
+	var url = protocol + "://" + device.address + path;
+//	console.log("HTTP_No_digest: " + url);
+	(async () => {
+		try {
+			const response = await got( url,{
+				responseType: resonseType,
+				https:{rejectUnauthorized: false}
+			});
+//			console.log("HTTP_No_digest: " + response );
+			callback(false, response.body );
+		} catch (error) {
+			callback(error, error );
+		}
+	})();
+}
+
+
 exports.HTTP_Get = function( device, path, resonseType, callback ) {
 	if( !device || !device.hasOwnProperty("address") || !device.hasOwnProperty("user") || !device.hasOwnProperty("password") ) {
 			callback("Invalid input","Missing address,user or password");
@@ -22,7 +41,7 @@ exports.HTTP_Get = function( device, path, resonseType, callback ) {
 					const options = res.request.options;
 					const digestHeader = res.headers["www-authenticate"];
 					if (!digestHeader){
-						console.error("Response contains no digest header");
+//						console.error("Response contains no digest header");
 						return res;
 					}
 					const incomingDigest = digestAuth.ClientDigestAuth.analyze(	digestHeader );
@@ -79,7 +98,7 @@ exports.HTTP_Post = function( device, path, body, responseType, callback ) {
 					const options = res.request.options;
 					const digestHeader = res.headers["www-authenticate"];
 					if (!digestHeader){
-						console.error("Response contains no digest header");
+//						console.error("Response contains no digest header");
 						return res;
 					}
 					const incomingDigest = digestAuth.ClientDigestAuth.analyze(	digestHeader );
@@ -114,7 +133,7 @@ exports.HTTP_Post = function( device, path, body, responseType, callback ) {
 //			console.log("Digest Post Response:", url, response.body);
 			callback(false, response.body );
 		} catch (error) {
-			console.error("HTTP Response Error:", error);
+//			console.error("HTTP Response Error:", error);
 			callback(error, error  );
 		}
 	})();
@@ -242,7 +261,7 @@ exports.upload = function( device, type, filename, options, buffer, callback ) {
 					const options = res.request.options;
 					const digestHeader = res.headers["www-authenticate"];
 					if (!digestHeader){
-						console.error("Response contains no digest header");
+//						console.error("Response contains no digest header");
 						return res;
 					}
 					const incomingDigest = digestAuth.ClientDigestAuth.analyze(	digestHeader );
