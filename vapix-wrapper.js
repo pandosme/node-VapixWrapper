@@ -38,7 +38,10 @@ exports.CGI = function( device, cgi, callback ) {
 			callback(error,body);
 			return;
 		}
-		if( body.search("Error") >= 0 ) {
+
+		//Manage VAPIX oddities...
+		var earlyErrorString = body.search("Error");
+		if( earlyErrorString >= 0 && earlyErrorString < 30) {
 			callback( true, body);
 			return;
 		}
@@ -109,7 +112,7 @@ exports.Param_Set = function( device, group, parameters, callback ) {
 			cgi += '&root.' + group + '.' + parameter + '=' + encodeURIComponent(value);
 		}
 	}
-	
+
 	exports.CGI( device, cgi, function( error, body ) {
 		if( error ) {
 			callback( error, body );
@@ -289,13 +292,13 @@ exports.Location_Set = function( device, data, callback ) {
 		location.longitude = -location.longitude;
 		lngSign = "-";
 	}
-	var lngInt = parseInt(location.longitude);	
+	var lngInt = parseInt(location.longitude);
 	var lngZ = "00";
 	if( lngInt >= 10 )
 		lngZ = "0";
 	if( lngInt >= 100 )
 		lngZ = "";
-	
+
 	cgi += "lat=" + latSign + latZ + parseFloat(location.latitude).toFixed(8);
 	cgi += "&lng=" + lngSign + lngZ + parseFloat(location.longitude).toFixed(8);
 	cgi += "&heading=" + location.direction;
@@ -331,12 +334,12 @@ exports.ACAP_Control = function( device, action, acapID, callback ) {
 		callback( "Invlaid input", "Missing ACAP control action");
 		return;
 	}
-	
+
 	if( !acapID || acapID.length == 0 || acapID.length > 20 ) {
 		callback( "Invalid input", "Invalid ACAP ID");
 		return;
 	}
-	
+
 	var cgi =  '/axis-cgi/applications/control.cgi?action=' + action + '&package=' + acapID;
 	exports.CGI( device, cgi, function(error, response) {
 		if( error ) {
@@ -385,7 +388,7 @@ exports.Account_Set = function( device, options, callback) {
 	account = options;
 	if( typeof account === "string" )
 		account = JSON.parse(account);
-	
+
 	if( !account || !account.hasOwnProperty("name") || !account.hasOwnProperty("privileges") || !account.hasOwnProperty("password") ) {
 		callback("Invalid input", "Missing account name, password or priviliges");
 		return;
@@ -406,7 +409,7 @@ exports.Account_Set = function( device, options, callback) {
 			});
 			return;
 		}
-		
+
 		var sgrp = "viewer";
 		if( account.privileges.toLowerCase() === "viewer" || account.privileges.toLowerCase() === "player" )
 			sgrp = "viewer";
@@ -416,9 +419,9 @@ exports.Account_Set = function( device, options, callback) {
 			sgrp = "viewer:operator:admin:ptz";
 		if( account.privileges.toLowerCase() === "api" )
 			sgrp = "operator:admin";
-		
+
 		cgi = '/axis-cgi/pwdgrp.cgi?action=add&user=' + account.name + '&pwd=' + encodeURIComponent(account.password) + '&grp=users&sgrp=' + sgrp + '&comment=node';
-		VapixDigest.HTTP_Get( device, cgi, "text", function( error, response ) {	
+		VapixDigest.HTTP_Get( device, cgi, "text", function( error, response ) {
 				if( error ) {
 					callback( error, response );
 					return;
@@ -451,14 +454,14 @@ exports.Account_Remove = function( device, accountName, callback) {
 
 exports.Upload_Firmare = function( device , options, callback ) {
 //	console.log("Firmware upgrade.");
-	
+
 	if( Buffer.isBuffer(options)  ) {
-		VapixDigest.upload( device, "firmware", "firmware.bin", options, function( error, response) {
+		VapixDigest.upload( device, "firmware", "firmware.bin", null, options, function( error, response) {
 			callback( error, response );
 		});
 		return;
 	}
-	
+
 	if( typeof options !== "string" ) {
 		callback("Invalid input","Firmware upload requires a filepath or buffer");
 		return;
@@ -466,7 +469,7 @@ exports.Upload_Firmare = function( device , options, callback ) {
 	if( !fs.existsSync(options) ) {
 		callback("Invalid input","File "+ options + " does not exist");
 		return;
-	}	
+	}
 
 	VapixDigest.upload( device, "firmware", "firmware.bin", null, fs.createReadStream(options), function( error, response) {
 //		console.log("Firmware upgrade: ", error, response);
@@ -498,8 +501,8 @@ exports.Upload_Overlay = function( device, filename, options, callback ) {
 	if( !fs.existsSync(filename) ) {
 		callback("Invalid input", filename + " does not exist");
 		return;
-	}	
-	
+	}
+
 	var paths = filename.split("/");
 	var file = paths[paths.length-1];
 
@@ -511,11 +514,11 @@ exports.Upload_Overlay = function( device, filename, options, callback ) {
 exports.Upload_ACAP = function( device , options, callback ) {
 	// options may be a filepath or a file buffer
 
-	if(!options) {  
+	if(!options) {
 		callback("Invalid input","Data must be a buffer or a filepath string");
 		return;
 	}
-	
+
 	if( Buffer.isBuffer(options)  ) {
 		VapixDigest.upload( device, "acap", "acap.eap", null, options, function( error, response) {
 			if(!error) {
@@ -553,7 +556,7 @@ exports.Upload_ACAP = function( device , options, callback ) {
 		});
 		return;
 	}
-	
+
 	if( typeof options !== "string" ) {
 		callback("Invalid input","Invalid filepath or buffer");
 		return;
@@ -561,7 +564,7 @@ exports.Upload_ACAP = function( device , options, callback ) {
 	if( !fs.existsSync(options) ) {
 		callback("Invalid input", options + " does not exist");
 		return;
-	}	
+	}
 
 	VapixDigest.upload( device, "acap", "acap.eap", null, fs.createReadStream(options), function( error, response) {
 		if(!error) {
@@ -604,7 +607,7 @@ exports.Certificates_Get = function( device, certificateID, callback ) {
 	var body = '<tds:GetCertificateInformation xmlns="http://www.onvif.org/ver10/device/wsdl">';
 	body += '<CertificateID>' + certificateID + '</CertificateID>';
 	body += '</tds:GetCertificateInformation>';
-	
+
 	VapixDigest.Soap( device, body, function( error, response ) {
 		if( error ) {
 			callback( error, response);

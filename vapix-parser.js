@@ -8,7 +8,7 @@ exports.param2json = function( data ) {
 	var result = {};
 	rows.forEach(function(row){
 		row = row.trim();
-		if( row.length > 5) {
+		if( row.length > 5 && row[0] !== '#') { //Manage VAPIX oddities...
 			var items = row.split('=');
 			var props = items[0].split('.');
 			var prop = result;
@@ -174,8 +174,8 @@ exports.Location = function( data, callback ) {
 			return;
 		}
 		var location = {
-			longitude: parseFloat(result.PositionResponse.Success.GetSuccess.Location.Lat),
-			latitude: parseFloat(result.PositionResponse.Success.GetSuccess.Location.Lng),
+			longitude: parseFloat(result.PositionResponse.Success.GetSuccess.Location.Lng),
+			latitude: parseFloat(result.PositionResponse.Success.GetSuccess.Location.Lat),
 			direction: parseFloat(result.PositionResponse.Success.GetSuccess.Location.Heading),
 			text: result.PositionResponse.Success.GetSuccess.Text
 		}

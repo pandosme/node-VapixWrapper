@@ -56,7 +56,7 @@ exports.HTTP_Get = function( device, path, resonseType, callback ) {
 			]
 		}
 	});
-	
+
 	(async () => {
 		try {
 			const response = await client.get( url,{
@@ -81,13 +81,13 @@ exports.HTTP_Post = function( device, path, body, responseType, callback ) {
 		callback("Invalid input", "Missing POST body");
 		return;
 	}
-	
+
 	var json = null;
 	if( typeof body === "object" )
 		json = body;
 	if( typeof body === "string" && (body[0]==='{' || body[0]==='[' ))
-		json = JSON.parse( body );	
-	
+		json = JSON.parse( body );
+
 	var protocol = device.protocol || "http";
 	var url = protocol + "://" + device.address + path;
 //	console.log("Digest POST:", url, body, responseType );
@@ -121,7 +121,7 @@ exports.HTTP_Post = function( device, path, body, responseType, callback ) {
 				response = await client.post( url, {
 												json: json,
 												responseType: 'json',
-												https: {rejectUnauthorized: false}					
+												https: {rejectUnauthorized: false}
 											});
 			else
 				response = await client.post( url, {
@@ -129,7 +129,7 @@ exports.HTTP_Post = function( device, path, body, responseType, callback ) {
 												responseType: responseType,
 												https: {rejectUnauthorized: false}
 											});
-				
+
 //			console.log("Digest Post Response:", url, response.body);
 			callback(false, response.body );
 		} catch (error) {
@@ -155,7 +155,7 @@ exports.Soap = function( device, body, callback ) {
 					   'xmlns:aev="http://www.axis.com/vapix/ws/event1" ' +
 					   'xmlns:aweb="http://www.axis.com/vapix/ws/webserver" '+
 					   'xmlns:SOAP-ENV="http://www.w3.org/2003/05/soap-envelope">\n';
-					   
+
 	soapEnvelope += '<SOAP-ENV:Body>' + body + '</SOAP-ENV:Body>\n';
 	soapEnvelope += '</SOAP-ENV:Envelope>\n';
 //	console.log("VapixDigest.Soap", soapEnvelope);
@@ -172,7 +172,7 @@ exports.upload = function( device, type, filename, options, buffer, callback ) {
 	var protocol = device.protocol || "http";
 	var url = protocol + "://" + device.address;
 
-	if(!buffer) {
+	if(!buffer || Buffer.isBuffer(buffer) !== true ) {
 		callback(true,"Invalid upload buffer");
 		return;
 	}
@@ -197,11 +197,11 @@ exports.upload = function( device, type, filename, options, buffer, callback ) {
 		context: "nodered",
 		method: ""
 	}
-	
+
 	var part1 = null;
 	var part2 = null;
 	var contenttype = "application/octet-stream";
-		
+
 	switch( type ) {
 		case "firmware":
 			url +=  '/axis-cgi/firmwaremanagement.cgi';
@@ -232,7 +232,7 @@ exports.upload = function( device, type, filename, options, buffer, callback ) {
 			part2 = "packfil";
 			contenttype = "application/octet-stream";
 		break;
-		
+
 		case "overlay":
 			url += '/axis-cgi/uploadoverlayimage.cgi';
 			part1 = "json";
@@ -244,7 +244,7 @@ exports.upload = function( device, type, filename, options, buffer, callback ) {
 			if( options && options.hasOwnProperty("scale") && options.scale )
 				formData.params.scaleToResolution = options.scale;
 			if( options && options.hasOwnProperty("alpha")  )
-				formData.params.alpha = options.alpha;			
+				formData.params.alpha = options.alpha;
 			contenttype = "image/" + filename.split(".")[1];
 		break;
 		default:
@@ -253,7 +253,6 @@ exports.upload = function( device, type, filename, options, buffer, callback ) {
 	}
 
 	var formJSON = JSON.stringify(formData);
-	
 	var client = got.extend({
 		hooks:{
 			afterResponse: [
@@ -270,7 +269,7 @@ exports.upload = function( device, type, filename, options, buffer, callback ) {
 						uri: options.url.pathname,
 						counter: 1
 					});
-					
+
 					const form = new FormData();
 					if( part1 ) {
 						form.append(
@@ -299,7 +298,7 @@ exports.upload = function( device, type, filename, options, buffer, callback ) {
 				}
 			]
 		}
-	});	
+	});
 
 	(async () => {
 		try {
