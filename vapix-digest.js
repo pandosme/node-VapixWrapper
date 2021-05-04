@@ -139,6 +139,143 @@ exports.HTTP_Post = function( device, path, body, responseType, callback ) {
 	})();
 }
 
+exports.HTTP_Put = function( device, path, body, responseType, callback ) {
+	if( !device || !device.hasOwnProperty("address") || !device.hasOwnProperty("user") || !device.hasOwnProperty("password") ) {
+			callback("Invalid input","Missing address,user or password");
+			return;
+	}
+
+	if(!body) {
+		callback("Invalid input", "Missing POST body");
+		return;
+	}
+
+	var json = null;
+	if( typeof body === "object" )
+		json = body;
+	if( typeof body === "string" && (body[0]==='{' || body[0]==='[' ))
+		json = JSON.parse( body );
+
+	var protocol = device.protocol || "http";
+	var url = protocol + "://" + device.address + path;
+//	console.log("Digest POST:", url, body, responseType );
+	var client = got.extend({
+		hooks:{
+			afterResponse: [
+				(res, retry) => {
+					const options = res.request.options;
+					const digestHeader = res.headers["www-authenticate"];
+					if (!digestHeader){
+//						console.error("Response contains no digest header");
+						return res;
+					}
+					const incomingDigest = digestAuth.ClientDigestAuth.analyze(	digestHeader );
+					const digest = digestAuth.ClientDigestAuth.generateProtectionAuth( incomingDigest, device.user, device.password,{
+						method: options.method,
+						uri: options.url.pathname,
+						counter: 1
+					});
+					options.headers.authorization = digest.raw;
+					return retry(options);
+				}
+			]
+		}
+	});
+
+	(async () => {
+		try {
+			var response = 0;
+			if( json )
+				response = await client.put( url, {
+												json: json,
+												responseType: 'json',
+												https: {rejectUnauthorized: false}
+											});
+			else
+				response = await client.put( url, {
+												body: body,
+												responseType: responseType,
+												https: {rejectUnauthorized: false}
+											});
+
+//			console.log("Digest Post Response:", url, response.body);
+			callback(false, response.body );
+		} catch (error) {
+//			console.error("HTTP Response Error:", error);
+			callback(error, error  );
+		}
+	})();
+}
+
+exports.HTTP_Patch = function( device, path, body, responseType, callback ) {
+	if( !device || !device.hasOwnProperty("address") || !device.hasOwnProperty("user") || !device.hasOwnProperty("password") ) {
+			callback("Invalid input","Missing address,user or password");
+			return;
+	}
+
+	if(!body) {
+		callback("Invalid input", "Missing POST body");
+		return;
+	}
+
+	var json = null;
+	if( typeof body === "object" )
+		json = body;
+	if( typeof body === "string" && (body[0]==='{' || body[0]==='[' ))
+		json = JSON.parse( body );
+
+	var protocol = device.protocol || "http";
+	var url = protocol + "://" + device.address + path;
+//	console.log("Digest POST:", url, body, responseType );
+	var client = got.extend({
+		hooks:{
+			afterResponse: [
+				(res, retry) => {
+					const options = res.request.options;
+					const digestHeader = res.headers["www-authenticate"];
+					if (!digestHeader){
+//						console.error("Response contains no digest header");
+						return res;
+					}
+					const incomingDigest = digestAuth.ClientDigestAuth.analyze(	digestHeader );
+					const digest = digestAuth.ClientDigestAuth.generateProtectionAuth( incomingDigest, device.user, device.password,{
+						method: options.method,
+						uri: options.url.pathname,
+						counter: 1
+					});
+					options.headers.authorization = digest.raw;
+					return retry(options);
+				}
+			]
+		}
+	});
+
+	(async () => {
+		try {
+			var response = 0;
+			if( json )
+				response = await client.patch( url, {
+												json: json,
+												responseType: 'json',
+												https: {rejectUnauthorized: false}
+											});
+			else
+				response = await client.patch( url, {
+												body: body,
+												responseType: responseType,
+												https: {rejectUnauthorized: false}
+											});
+
+//			console.log("Digest Post Response:", url, response.body);
+			callback(false, response.body );
+		} catch (error) {
+//			console.error("HTTP Response Error:", error);
+			callback(error, error  );
+		}
+	})();
+}
+
+
 exports.Soap = function( device, body, callback ) {
 	var soapEnvelope = '<SOAP-ENV:Envelope ' +
 	                   'xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" '+

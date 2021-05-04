@@ -1,3 +1,7 @@
+## 1.2.3
+- Fixed flaw in ACAP constrol (start/stop/remove) that gave faulty response error
+- Added support for HTTP method put and patch
+
 ## 1.2.2
 - Bugfix: Inject buffer to Upload_Firmare
 - Bugfix: Device location Longitude & Latitude was switched

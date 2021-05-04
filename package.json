@@ -1,6 +1,6 @@
 {
   "name": "vapix-wrapper",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Axis VAPIX request,parser & respond library",
   "author": {
     "name": "Fred Juhlin",
