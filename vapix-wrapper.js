@@ -90,7 +90,7 @@ exports.Param_Get = function( device, paramPath, callback ) {
 		callback("Invalid input","Invalid parameter group" );
 		return;
 	}
-	exports.CGI( device, '/axis-cgi/param.cgi?action=list&group=' + paramPath, function( error, body ) {
+	exports.HTTP_Get( device, '/axis-cgi/param.cgi?action=list&group=' + paramPath, "text", function( error, body ) {
 		if( error ) {
 			callback( error, body );
 			return;
@@ -152,7 +152,7 @@ exports.DeviceInfo = function( device, callback ) {
 	//Brand
 	exports.Param_Get( device, "brand", function( error, response ) {
 		if( error ) {
-			callback( error,"Unable to read get brand data" );
+			callback( error,info );
 			return;
 		}
 
@@ -163,7 +163,7 @@ exports.DeviceInfo = function( device, callback ) {
 
 		exports.Param_Get( device, "network", function( error, response ) {
 			if( error ) {
-				callback( error,"Unable to read network settings" );
+				callback( error, info );
 				return;
 			}
 			if( response.hasOwnProperty("HostName") )
@@ -180,7 +180,7 @@ exports.DeviceInfo = function( device, callback ) {
 
 				exports.Param_Get( device, "properties", function( error, response ) {
 					if( error ) {
-						callback( error,"Unable to read properties" );
+						callback( error, info );
 						return;
 					}
 					if( response.hasOwnProperty("Firmware") && response.Firmware.hasOwnProperty("Version"))

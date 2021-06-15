@@ -1,3 +1,6 @@
+## 1.2.4
+- Fixed flaw in Get param to manage #error respons from Axis device in param listing
+
 ## 1.2.3
 - Fixed flaw in ACAP constrol (start/stop/remove) that gave faulty response error
 - Added support for HTTP method put and patch

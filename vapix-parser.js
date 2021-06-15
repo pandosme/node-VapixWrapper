@@ -10,26 +10,28 @@ exports.param2json = function( data ) {
 		row = row.trim();
 		if( row.length > 5 && row[0] !== '#') { //Manage VAPIX oddities...
 			var items = row.split('=');
-			var props = items[0].split('.');
-			var prop = result;
-			for( i = 2; i < props.length; i++ ) {
-				if( prop.hasOwnProperty(props[i]) ) {
-					prop = prop[props[i]];
-				} else {
-					if( i === props.length - 1 ) {
-						if( items.length > 1 ) {
-							prop[props[i]] = items[1];
-							if( items[1] === 'yes' )
-								prop[props[i]] = true;
-							if( items[1] === 'no' )
-								prop[props[i]] = false;
-						} else {
-							prop[props[i]] = "";
-						}
+			if( items && items.length === 2 ) {
+				var props = items[0].split('.');
+				var prop = result;
+				for( i = 2; i < props.length; i++ ) {
+					if( prop.hasOwnProperty(props[i]) ) {
+						prop = prop[props[i]];
 					} else {
-						prop[props[i]] = {};
+						if( i === props.length - 1 ) {
+							if( items.length > 1 ) {
+								prop[props[i]] = items[1];
+								if( items[1] === 'yes' )
+									prop[props[i]] = true;
+								if( items[1] === 'no' )
+									prop[props[i]] = false;
+							} else {
+								prop[props[i]] = "";
+							}
+						} else {
+							prop[props[i]] = {};
+						}
+						prop = prop[props[i]];
 					}
-					prop = prop[props[i]];
 				}
 			}
 		}
