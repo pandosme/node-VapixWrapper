@@ -1,10 +1,10 @@
 {
   "name": "vapix-wrapper",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "Axis VAPIX request,parser & respond library",
   "author": {
     "name": "Fred Juhlin",
-    "email": "fred.juhlin.gmail.com"
+    "email": "fred.juhlin@gmail.com"
   },
   "license": "MIT",
   "main": "vapix-wrapper.js",
